@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blender Style UI Toolkit</title>
+  <link rel="stylesheet" href="blender-ui.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .app-layout {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* Collapsible Navigation Sidebar */
+    .app-nav {
+      width: 200px;
+      min-width: 200px;
+      background-color: var(--bl-bg-dark);
+      border-right: 1px solid var(--bl-border-dark);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .app-nav.collapsed {
+      width: 40px;
+      min-width: 40px;
+    }
+
+    .app-nav-header {
+      display: flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 var(--bl-spacing-sm);
+      background-color: var(--bl-bg-light);
+      border-bottom: 1px solid var(--bl-border-dark);
+      gap: var(--bl-spacing-sm);
+    }
+
+    .app-nav-toggle {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--bl-text-secondary);
+      cursor: pointer;
+      border-radius: var(--bl-radius-sm);
+      flex-shrink: 0;
+    }
+
+    .app-nav-toggle:hover {
+      background-color: var(--bl-bg-hover);
+      color: var(--bl-text-primary);
+    }
+
+    .app-nav-toggle svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .app-nav.collapsed .app-nav-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    .app-nav-title {
+      font-size: var(--bl-font-size-sm);
+      font-weight: 500;
+      color: var(--bl-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .app-nav.collapsed .app-nav-title {
+      display: none;
+    }
+
+    .app-nav-items {
+      flex: 1;
+      padding: var(--bl-spacing-sm);
+      overflow-y: auto;
+    }
+
+    .app-nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--bl-spacing-md);
+      padding: var(--bl-spacing-sm) var(--bl-spacing-md);
+      border-radius: var(--bl-radius-md);
+      cursor: pointer;
+      color: var(--bl-text-secondary);
+      font-size: var(--bl-font-size-base);
+      white-space: nowrap;
+    }
+
+    .app-nav-item:hover {
+      background-color: var(--bl-bg-light);
+      color: var(--bl-text-primary);
+    }
+
+    .app-nav-item.active {
+      background-color: var(--bl-accent-subtle);
+      color: var(--bl-accent);
+    }
+
+    .app-nav-item svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    .app-nav-item-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-nav.collapsed .app-nav-item {
+      padding: var(--bl-spacing-sm);
+      justify-content: center;
+    }
+
+    .app-nav.collapsed .app-nav-item-label {
+      display: none;
+    }
+
+    .app-nav-footer {
+      padding: var(--bl-spacing-sm);
+      border-top: 1px solid var(--bl-border-dark);
+    }
+
+    .app-nav-footer .app-nav-item {
+      margin-bottom: var(--bl-spacing-xs);
+    }
+
+    .app-nav-footer .app-nav-item:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Main Content Area */
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .app-page {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .app-page.active {
+      display: flex;
+    }
+
+    /* Page-specific styles */
+    .page-widgets {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .page-widgets .demo-main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .page-widgets .demo-sidebar {
+      width: 280px;
+      background-color: var(--bl-bg-base);
+      border-right: 1px solid var(--bl-border-dark);
+      overflow-y: auto;
+    }
+
+    .page-widgets .demo-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--bl-spacing-lg);
+    }
+
+    .demo-section {
+      margin-bottom: var(--bl-spacing-xl);
+      padding: var(--bl-spacing-lg);
+      background-color: var(--bl-bg-base);
+      border-radius: var(--bl-radius-md);
+    }
+
+    .demo-section-title {
+      font-size: var(--bl-font-size-sm);
+      font-weight: 500;
+      color: var(--bl-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--bl-spacing-lg);
+      padding-bottom: var(--bl-spacing-sm);
+      border-bottom: 1px solid var(--bl-border-dark);
+    }
+
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--bl-spacing-md);
+      margin-bottom: var(--bl-spacing-md);
+    }
+
+    .demo-label {
+      font-size: var(--bl-font-size-sm);
+      color: var(--bl-text-muted);
+      margin-bottom: var(--bl-spacing-xs);
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--bl-spacing-md);
+    }
+
+    .icon-placeholder {
+      width: 14px;
+      height: 14px;
+      background-color: currentColor;
+      opacity: 0.7;
+      border-radius: 2px;
+    }
+
+    /* Profiler page styles */
+    .page-profiler {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profiler-main {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .profiler-timeline-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 200px;
+    }
+
+    .profiler-timeline-area .bl-timeline {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border: none;
+      border-radius: 0;
+    }
+
+    .profiler-details {
+      height: 200px;
+      min-height: 100px;
+      max-height: 50vh;
+      background-color: var(--bl-bg-base);
+      border-top: 1px solid var(--bl-border-dark);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .profiler-details-tabs-primary {
+      display: flex;
+      align-items: flex-end;
+      height: 30px;
+      padding: 0 var(--bl-spacing-sm);
+      background-color: var(--bl-bg-dark);
+      border-bottom: 1px solid var(--bl-border-button);
+      gap: var(--bl-spacing-md);
+    }
+
+    .details-primary-tabs {
+      display: flex;
+      gap: 1px;
+      flex: 1;
+    }
+
+    .details-primary-tab {
+      padding: 6px 12px;
+      font-family: var(--bl-font-family);
+      font-size: var(--bl-font-size-sm);
+      color: var(--bl-text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: var(--bl-radius-sm) var(--bl-radius-sm) 0 0;
+      cursor: pointer;
+    }
+
+    .details-primary-tab:hover {
+      color: var(--bl-text-primary);
+      background-color: var(--bl-bg-light);
+    }
+
+    .details-primary-tab.active {
+      color: var(--bl-text-primary);
+      background-color: var(--bl-bg-base);
+      border-color: var(--bl-border-button);
+      box-shadow: var(--bl-button-highlight);
+      margin-bottom: -1px;
+      padding-bottom: 7px;
+    }
+
+    .profiler-details-actions {
+      display: flex;
+      gap: 2px;
+      padding-bottom: 4px;
+    }
+
+    .profiler-details-header {
+      display: flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 var(--bl-spacing-md);
+      background-color: var(--bl-bg-base);
+      border-bottom: 1px solid var(--bl-border-dark);
+      gap: var(--bl-spacing-md);
+    }
+
+    .details-secondary-tabs {
+      display: inline-flex;
+      border: 1px solid var(--bl-border-button);
+      border-radius: var(--bl-radius-md);
+    }
+
+    .details-secondary-tab {
+      padding: 4px 10px;
+      font-family: var(--bl-font-family);
+      font-size: var(--bl-font-size-sm);
+      color: var(--bl-text-secondary);
+      background-color: var(--bl-bg-base);
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    .details-secondary-tab:first-child {
+      border-radius: var(--bl-radius-sm) 0 0 var(--bl-radius-sm);
+    }
+
+    .details-secondary-tab:last-child {
+      border-radius: 0 var(--bl-radius-sm) var(--bl-radius-sm) 0;
+    }
+
+    .details-secondary-tab:only-child {
+      border-radius: var(--bl-radius-sm);
+    }
+
+    .details-secondary-tab:hover {
+      color: var(--bl-text-primary);
+      background-color: var(--bl-bg-light);
+    }
+
+    .details-secondary-tab.active {
+      color: var(--bl-text-primary);
+      background-color: var(--bl-bg-light);
+      box-shadow: var(--bl-highlight-top);
+    }
+
+    .profiler-details-title {
+      font-size: var(--bl-font-size-base);
+      font-weight: 500;
+      color: var(--bl-text-primary);
+    }
+
+    .profiler-details-content {
+      flex: 1;
+      overflow: auto;
+      padding: var(--bl-spacing-md);
+    }
+
+    .profiler-resize-handle {
+      height: 4px;
+      background-color: var(--bl-bg-light);
+      cursor: ns-resize;
+    }
+
+    .profiler-resize-handle:hover {
+      background-color: var(--bl-accent);
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--bl-spacing-lg);
+    }
+
+    .details-section {
+      background-color: var(--bl-bg-dark);
+      border-radius: var(--bl-radius-md);
+      padding: var(--bl-spacing-md);
+    }
+
+    .details-section-title {
+      font-size: var(--bl-font-size-sm);
+      font-weight: 500;
+      color: var(--bl-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--bl-spacing-md);
+      padding-bottom: var(--bl-spacing-sm);
+      border-bottom: 1px solid var(--bl-border-dark);
+    }
+
+    .details-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--bl-spacing-xs) 0;
+      font-size: var(--bl-font-size-base);
+    }
+
+    .details-label {
+      color: var(--bl-text-secondary);
+    }
+
+    .details-value {
+      font-family: var(--bl-font-mono);
+      color: var(--bl-text-primary);
+    }
+
+    .details-value.highlight {
+      color: var(--bl-accent);
+    }
+
+    .flame-bar {
+      height: 8px;
+      background-color: var(--bl-bg-dark);
+      border-radius: var(--bl-radius-sm);
+      margin-top: var(--bl-spacing-sm);
+      overflow: hidden;
+      display: flex;
+    }
+
+    .flame-bar-segment {
+      height: 100%;
+    }
+
+    /* Plugins page styles */
+    .page-plugins {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .plugins-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--bl-spacing-lg);
+    }
+
+    .plugins-list {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--bl-spacing-md);
+    }
+
+    .plugin-item {
+      background-color: var(--bl-bg-base);
+      border: 1px solid var(--bl-border-dark);
+      border-radius: var(--bl-radius-md);
+      padding: var(--bl-spacing-md);
+      box-shadow: var(--bl-button-highlight);
+    }
+
+    .plugin-item.disabled {
+      opacity: 0.7;
+    }
+
+    .plugin-header {
+      display: flex;
+      align-items: center;
+      gap: var(--bl-spacing-md);
+      margin-bottom: var(--bl-spacing-sm);
+    }
+
+    .plugin-header .bl-checkbox {
+      margin: 0;
+    }
+
+    .plugin-info {
+      flex: 1;
+      display: flex;
+      align-items: baseline;
+      gap: var(--bl-spacing-md);
+    }
+
+    .plugin-name {
+      font-weight: 500;
+      color: var(--bl-text-primary);
+      font-size: var(--bl-font-size-lg);
+    }
+
+    .plugin-version {
+      font-size: var(--bl-font-size-sm);
+      color: var(--bl-text-muted);
+      font-family: var(--bl-font-mono);
+    }
+
+    .plugin-actions {
+      display: flex;
+      gap: var(--bl-spacing-xs);
+    }
+
+    .plugin-description {
+      color: var(--bl-text-secondary);
+      font-size: var(--bl-font-size-base);
+      line-height: 1.5;
+      margin-bottom: var(--bl-spacing-sm);
+      padding-left: 28px;
+    }
+
+    .plugin-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--bl-spacing-md);
+      padding-left: 28px;
+    }
+
+    .plugin-author {
+      font-size: var(--bl-font-size-sm);
+      color: var(--bl-text-muted);
+    }
+  </style>
+</head>
+<body class="bl-root">
+  <div class="app-layout">
+    <!-- Navigation Sidebar -->
+    <nav class="app-nav" id="appNav">
+      <div class="app-nav-header">
+        <button class="app-nav-toggle" onclick="toggleNav()" title="Toggle sidebar">
+          <svg viewBox="0 0 16 16"><path d="M11 3L5 8l6 5V3z"/></svg>
+        </button>
+        <span class="app-nav-title">Blender UI</span>
+      </div>
+      <div class="app-nav-items">
+        <div class="app-nav-item active" onclick="switchPage('widgets')" data-page="widgets">
+          <svg viewBox="0 0 16 16"><path d="M2 2h5v5H2V2zm7 0h5v5H9V2zM2 9h5v5H2V9zm7 0h5v5H9V9z"/></svg>
+          <span class="app-nav-item-label">Widgets</span>
+        </div>
+        <div class="app-nav-item" onclick="switchPage('profiler')" data-page="profiler">
+          <svg viewBox="0 0 16 16"><path d="M1 14h14v1H1v-1zm1-3h2v3H2v-3zm3-2h2v5H5V9zm3-4h2v9H8V5zm3 2h2v7h-2V7z"/></svg>
+          <span class="app-nav-item-label">Profiler</span>
+        </div>
+        <div class="app-nav-item" onclick="switchPage('plugins')" data-page="plugins">
+          <svg viewBox="0 0 16 16"><path d="M6 1v3H4.5A1.5 1.5 0 0 0 3 5.5v1A1.5 1.5 0 0 0 4.5 8H6v7h4V8h1.5A1.5 1.5 0 0 0 13 6.5v-1A1.5 1.5 0 0 0 11.5 4H10V1H6z"/></svg>
+          <span class="app-nav-item-label">Plugins</span>
+        </div>
+      </div>
+      <div class="app-nav-footer">
+        <div class="app-nav-item" onclick="toggleTheme()" id="themeToggle">
+          <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5V2.5a5.5 5.5 0 0 1 0 11z"/></svg>
+          <span class="app-nav-item-label">Toggle Theme</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Widgets Page -->
+      <div class="app-page active" id="page-widgets">
+        <div class="page-widgets">
+          <!-- Header Bar -->
+          <header class="bl-header">
+            <div class="bl-header-menu">
+              <div class="bl-header-menu-item">File</div>
+              <div class="bl-header-menu-item">Edit</div>
+              <div class="bl-header-menu-item">View</div>
+              <div class="bl-header-menu-item">Object</div>
+              <div class="bl-header-menu-item">Help</div>
+            </div>
+          </header>
+
+          <div class="demo-main">
+            <!-- Sidebar with Panels -->
+            <aside class="demo-sidebar">
+              <!-- Transform Panel -->
+              <div class="bl-panel">
+                <div class="bl-panel-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                  <div class="bl-panel-toggle">
+                    <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                  </div>
+                  <span class="bl-panel-title">Transform</span>
+                </div>
+                <div class="bl-panel-content">
+                  <div class="bl-form-row">
+                    <label class="bl-form-label">Location</label>
+                    <div class="bl-flex bl-gap-xs">
+                      <div class="bl-number-input">
+                        <span class="bl-number-label">X</span>
+                        <input type="text" value="0.000">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bl-form-row">
+                    <label class="bl-form-label"></label>
+                    <div class="bl-flex bl-gap-xs">
+                      <div class="bl-number-input">
+                        <span class="bl-number-label">Y</span>
+                        <input type="text" value="0.000">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bl-form-row">
+                    <label class="bl-form-label"></label>
+                    <div class="bl-flex bl-gap-xs">
+                      <div class="bl-number-input">
+                        <span class="bl-number-label">Z</span>
+                        <input type="text" value="0.000">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Material Panel -->
+              <div class="bl-panel">
+                <div class="bl-panel-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                  <div class="bl-panel-toggle">
+                    <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                  </div>
+                  <span class="bl-panel-title">Material</span>
+                </div>
+                <div class="bl-panel-content">
+                  <div class="bl-form-row">
+                    <label class="bl-form-label">Base Color</label>
+                    <div class="bl-color-swatch">
+                      <div class="bl-color-preview" style="background-color: #e87d0d;"></div>
+                      <span class="bl-color-value">#E87D0D</span>
+                    </div>
+                  </div>
+                  <div class="bl-form-row">
+                    <label class="bl-form-label">Metallic</label>
+                    <div class="bl-slider">
+                      <input type="range" min="0" max="100" value="0">
+                      <span class="bl-slider-value">0.00</span>
+                    </div>
+                  </div>
+                  <div class="bl-form-row">
+                    <label class="bl-form-label">Roughness</label>
+                    <div class="bl-slider">
+                      <input type="range" min="0" max="100" value="50">
+                      <span class="bl-slider-value">0.50</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tree View -->
+              <div class="bl-panel">
+                <div class="bl-panel-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                  <div class="bl-panel-toggle">
+                    <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                  </div>
+                  <span class="bl-panel-title">Scene Collection</span>
+                </div>
+                <div class="bl-panel-content">
+                  <div class="bl-tree">
+                    <div class="bl-tree-item" onclick="this.classList.toggle('collapsed')">
+                      <div class="bl-tree-toggle">
+                        <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                      </div>
+                      <div class="bl-tree-icon"><div class="icon-placeholder"></div></div>
+                      <span>Collection</span>
+                    </div>
+                    <div class="bl-tree-children">
+                      <div class="bl-tree-item active">
+                        <div class="bl-tree-toggle"></div>
+                        <div class="bl-tree-icon"><div class="icon-placeholder"></div></div>
+                        <span>Cube</span>
+                      </div>
+                      <div class="bl-tree-item">
+                        <div class="bl-tree-toggle"></div>
+                        <div class="bl-tree-icon"><div class="icon-placeholder"></div></div>
+                        <span>Camera</span>
+                      </div>
+                      <div class="bl-tree-item">
+                        <div class="bl-tree-toggle"></div>
+                        <div class="bl-tree-icon"><div class="icon-placeholder"></div></div>
+                        <span>Light</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="demo-content">
+              <!-- Buttons Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Buttons</h2>
+                <div class="demo-label">Standard Buttons</div>
+                <div class="demo-row">
+                  <button class="bl-btn">Default</button>
+                  <button class="bl-btn bl-btn-primary">Primary</button>
+                  <button class="bl-btn" disabled>Disabled</button>
+                </div>
+                <div class="demo-label">Icon Buttons</div>
+                <div class="demo-row">
+                  <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Move">
+                    <div class="icon-placeholder"></div>
+                  </button>
+                  <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Rotate">
+                    <div class="icon-placeholder"></div>
+                  </button>
+                  <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Scale">
+                    <div class="icon-placeholder"></div>
+                  </button>
+                </div>
+                <div class="demo-label">Button Group</div>
+                <div class="demo-row">
+                  <div class="bl-btn-group">
+                    <button class="bl-btn bl-btn-toggle active">Object</button>
+                    <button class="bl-btn bl-btn-toggle">Edit</button>
+                    <button class="bl-btn bl-btn-toggle">Sculpt</button>
+                  </div>
+                </div>
+                <div class="demo-label">Segmented Buttons</div>
+                <div class="demo-row">
+                  <div class="bl-segmented">
+                    <button class="bl-segmented-btn active">Vertex</button>
+                    <button class="bl-segmented-btn">Edge</button>
+                    <button class="bl-segmented-btn">Face</button>
+                  </div>
+                  <div class="bl-segmented">
+                    <button class="bl-segmented-btn icon-only active" title="Grid">
+                      <svg viewBox="0 0 16 16"><path d="M1 1h6v6H1V1zm8 0h6v6H9V1zM1 9h6v6H1V9zm8 0h6v6H9V9z"/></svg>
+                    </button>
+                    <button class="bl-segmented-btn icon-only" title="List">
+                      <svg viewBox="0 0 16 16"><path d="M1 2h14v2H1V2zm0 5h14v2H1V7zm0 5h14v2H1v-2z"/></svg>
+                    </button>
+                    <button class="bl-segmented-btn icon-only" title="Details">
+                      <svg viewBox="0 0 16 16"><path d="M1 1h4v4H1V1zm6 1h8v2H7V2zM1 6h4v4H1V6zm6 1h8v2H7V7zM1 11h4v4H1v-4zm6 1h8v2H7v-2z"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="demo-row">
+                  <div class="bl-segmented">
+                    <button class="bl-segmented-btn icon-only" title="Align Left">
+                      <svg viewBox="0 0 16 16"><path d="M1 2h10v2H1V2zm0 4h14v2H1V6zm0 4h8v2H1v-2zm0 4h12v2H1v-2z"/></svg>
+                    </button>
+                    <button class="bl-segmented-btn icon-only active" title="Align Center">
+                      <svg viewBox="0 0 16 16"><path d="M3 2h10v2H3V2zm1 4h8v2H4V6zm2 4h4v2H6v-2zm1 4h2v2H7v-2z"/></svg>
+                    </button>
+                    <button class="bl-segmented-btn icon-only" title="Align Right">
+                      <svg viewBox="0 0 16 16"><path d="M5 2h10v2H5V2zm1 4h9v2H6V6zm2 4h7v2H8v-2zm1 4h6v2H9v-2z"/></svg>
+                    </button>
+                  </div>
+                  <div class="bl-segmented">
+                    <button class="bl-segmented-btn">
+                      <svg viewBox="0 0 16 16"><path d="M8 1l7 14H1L8 1z"/></svg>
+                      Solid
+                    </button>
+                    <button class="bl-segmented-btn active">
+                      <svg viewBox="0 0 16 16"><path d="M8 1l7 14H1L8 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                      Wire
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Text Inputs Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Text Inputs</h2>
+                <div class="demo-label">Standard Input</div>
+                <div class="demo-row">
+                  <input type="text" class="bl-input" placeholder="Enter text...">
+                  <input type="text" class="bl-input" value="With value">
+                  <input type="text" class="bl-input" disabled value="Disabled">
+                </div>
+                <div class="demo-label">Number Inputs</div>
+                <div class="demo-row">
+                  <div class="bl-number-input">
+                    <span class="bl-number-label">X</span>
+                    <input type="text" value="0.000">
+                  </div>
+                  <div class="bl-number-input">
+                    <span class="bl-number-label">Y</span>
+                    <input type="text" value="0.000">
+                  </div>
+                  <div class="bl-number-input">
+                    <span class="bl-number-label">Z</span>
+                    <input type="text" value="0.000">
+                  </div>
+                </div>
+              </section>
+
+              <!-- Selects Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Select Inputs</h2>
+                <div class="demo-row">
+                  <div class="bl-select">
+                    <select>
+                      <option>Object Mode</option>
+                      <option>Edit Mode</option>
+                      <option>Sculpt Mode</option>
+                    </select>
+                  </div>
+                  <div class="bl-select">
+                    <select>
+                      <option>Solid</option>
+                      <option>Wireframe</option>
+                      <option>Material Preview</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Checkboxes & Radio Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Checkboxes & Radio Buttons</h2>
+                <div class="demo-label">Checkboxes</div>
+                <div class="demo-row">
+                  <label class="bl-checkbox">
+                    <input type="checkbox" checked>
+                    Show Overlays
+                  </label>
+                  <label class="bl-checkbox">
+                    <input type="checkbox" checked>
+                    Show Floor
+                  </label>
+                  <label class="bl-checkbox">
+                    <input type="checkbox">
+                    Show Axes
+                  </label>
+                </div>
+                <div class="demo-label">Disabled Checkboxes</div>
+                <div class="demo-row">
+                  <label class="bl-checkbox">
+                    <input type="checkbox" checked disabled>
+                    Checked Disabled
+                  </label>
+                  <label class="bl-checkbox">
+                    <input type="checkbox" disabled>
+                    Unchecked Disabled
+                  </label>
+                </div>
+                <div class="demo-label">Radio Buttons</div>
+                <div class="demo-row">
+                  <label class="bl-radio">
+                    <input type="radio" name="pivot" checked>
+                    Median Point
+                  </label>
+                  <label class="bl-radio">
+                    <input type="radio" name="pivot">
+                    3D Cursor
+                  </label>
+                  <label class="bl-radio">
+                    <input type="radio" name="pivot">
+                    Active Element
+                  </label>
+                </div>
+                <div class="demo-label">Disabled Radio Buttons</div>
+                <div class="demo-row">
+                  <label class="bl-radio">
+                    <input type="radio" name="disabled-radio" checked disabled>
+                    Selected Disabled
+                  </label>
+                  <label class="bl-radio">
+                    <input type="radio" name="disabled-radio" disabled>
+                    Unselected Disabled
+                  </label>
+                </div>
+              </section>
+
+              <!-- Sliders Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Sliders & Progress</h2>
+                <div class="demo-label">Sliders</div>
+                <div class="demo-grid">
+                  <div class="bl-slider">
+                    <input type="range" min="0" max="100" value="75">
+                    <span class="bl-slider-value">0.75</span>
+                  </div>
+                  <div class="bl-slider">
+                    <input type="range" min="0" max="100" value="25">
+                    <span class="bl-slider-value">0.25</span>
+                  </div>
+                </div>
+                <div class="demo-label bl-mt-md">Progress Bars</div>
+                <div style="max-width: 400px;">
+                  <div class="bl-progress bl-mb-md">
+                    <div class="bl-progress-bar" style="width: 75%;"></div>
+                  </div>
+                  <div class="bl-progress">
+                    <div class="bl-progress-bar" style="width: 45%;"></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Tabs Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Tabs</h2>
+                <div class="bl-tabs">
+                  <button class="bl-tab active" onclick="switchTab(this)">Scene</button>
+                  <button class="bl-tab" onclick="switchTab(this)">World</button>
+                  <button class="bl-tab" onclick="switchTab(this)">Object</button>
+                  <button class="bl-tab" onclick="switchTab(this)">Modifiers</button>
+                </div>
+                <div class="bl-tab-content">
+                  <p style="color: var(--bl-text-secondary); margin: 0;">Tab content area</p>
+                </div>
+              </section>
+
+              <!-- Table Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Table</h2>
+                <table class="bl-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Vertices</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="selected">
+                      <td>Cube</td>
+                      <td>Mesh</td>
+                      <td>8</td>
+                      <td><span class="bl-badge bl-badge-success">Active</span></td>
+                    </tr>
+                    <tr>
+                      <td>Suzanne</td>
+                      <td>Mesh</td>
+                      <td>507</td>
+                      <td><span class="bl-badge">Hidden</span></td>
+                    </tr>
+                    <tr>
+                      <td>Sphere</td>
+                      <td>Mesh</td>
+                      <td>482</td>
+                      <td><span class="bl-badge bl-badge-warning">Modified</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- Badges Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Badges</h2>
+                <div class="demo-row">
+                  <span class="bl-badge">Default</span>
+                  <span class="bl-badge bl-badge-success">Success</span>
+                  <span class="bl-badge bl-badge-warning">Warning</span>
+                  <span class="bl-badge bl-badge-error">Error</span>
+                </div>
+              </section>
+
+              <!-- Menu Section -->
+              <section class="demo-section">
+                <h2 class="demo-section-title">Dropdown Menu</h2>
+                <div class="demo-row">
+                  <div class="bl-menu" style="display: inline-block;">
+                    <div class="bl-menu-item">
+                      <span>New</span>
+                      <span class="bl-menu-item-shortcut">Ctrl+N</span>
+                    </div>
+                    <div class="bl-menu-item">
+                      <span>Open...</span>
+                      <span class="bl-menu-item-shortcut">Ctrl+O</span>
+                    </div>
+                    <div class="bl-menu-item">
+                      <span>Save</span>
+                      <span class="bl-menu-item-shortcut">Ctrl+S</span>
+                    </div>
+                    <div class="bl-menu-separator"></div>
+                    <div class="bl-menu-item disabled">
+                      <span>Recover Last Session</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- Status Bar -->
+          <footer class="bl-statusbar">
+            <span class="bl-statusbar-item">Verts: 8</span>
+            <span class="bl-statusbar-item">Faces: 6</span>
+            <span class="bl-statusbar-item">Objects: 3/3</span>
+            <span class="bl-statusbar-item" style="margin-left: auto; border-right: none;">Blender UI Toolkit v1.0</span>
+          </footer>
+        </div>
+      </div>
+
+      <!-- Profiler Page -->
+      <div class="app-page" id="page-profiler">
+        <div class="page-profiler">
+          <!-- Header Bar -->
+          <header class="bl-header">
+            <div class="bl-header-menu">
+              <div class="bl-header-menu-item">File</div>
+              <div class="bl-header-menu-item">Edit</div>
+              <div class="bl-header-menu-item">View</div>
+              <div class="bl-header-menu-item">Profile</div>
+              <div class="bl-header-menu-item">Help</div>
+            </div>
+            <div style="margin-left: auto; display: flex; align-items: center; gap: var(--bl-spacing-md);">
+              <span class="bl-badge bl-badge-success">Recording</span>
+              <button class="bl-btn bl-btn-primary">Stop</button>
+            </div>
+          </header>
+
+          <div class="profiler-main">
+            <div class="profiler-timeline-area">
+              <div class="bl-timeline">
+                <!-- Timeline Header -->
+                <div class="bl-timeline-header">
+                  <span class="bl-timeline-title">Frame Profile - Frame #1247</span>
+                  <div class="bl-btn-group">
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Previous Frame">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11 3L5 8l6 5V3z"/><rect x="3" y="3" width="2" height="10"/></svg>
+                    </button>
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Next Frame">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3l6 5-6 5V3z"/><rect x="11" y="3" width="2" height="10"/></svg>
+                    </button>
+                  </div>
+                  <div class="bl-timeline-controls">
+                    <div class="bl-select">
+                      <select>
+                        <option>All Threads</option>
+                        <option>Main Thread</option>
+                        <option>GPU</option>
+                      </select>
+                    </div>
+                    <div class="bl-timeline-zoom">
+                      <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Zoom Out">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="7" width="10" height="2"/></svg>
+                      </button>
+                      <span>100%</span>
+                      <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Zoom In">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="7" width="10" height="2"/><rect x="7" y="3" width="2" height="10"/></svg>
+                      </button>
+                    </div>
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Fit to Window">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h4v2H4v2H2V2zm8 0h4v4h-2V4h-2V2zM4 10H2v4h4v-2H4v-2zm8 2v2h-2v2h4v-4h-2z"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Timeline Minimap -->
+                <div class="bl-timeline-minimap">
+                  <div class="bl-timeline-minimap-slice" style="left: 2%; width: 50%; top: 6px; background-color: #5a9a5a;"></div>
+                  <div class="bl-timeline-minimap-slice" style="left: 55%; width: 15%; top: 10px; background-color: #d4842a;"></div>
+                  <div class="bl-timeline-minimap-slice" style="left: 70%; width: 20%; top: 14px; background-color: #8a6ab5;"></div>
+                  <div class="bl-timeline-minimap-slice" style="left: 3%; width: 45%; top: 20px; background-color: #b54a4a;"></div>
+                  <div class="bl-timeline-minimap-viewport" style="left: 0%; width: 100%;"></div>
+                </div>
+
+                <!-- Timeline Body -->
+                <div class="bl-timeline-body">
+                  <div class="bl-timeline-ruler-row">
+                    <div class="bl-timeline-tracks-header">
+                      <div class="bl-track-search">
+                        <svg viewBox="0 0 16 16"><path d="M11.5 10.5L15 14M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <input type="text" placeholder="Filter tracks...">
+                      </div>
+                      <div class="bl-track-header-actions">
+                        <button class="bl-track-btn bl-tooltip" data-tooltip="Expand All" onclick="expandAllTracks()">
+                          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 4h10v2H3V4zm3 4h4v2H6V8zm-3 4h10v2H3v-2z"/></svg>
+                        </button>
+                        <button class="bl-track-btn bl-tooltip" data-tooltip="Collapse All" onclick="collapseAllTracks()">
+                          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 7h10v2H3V7z"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="bl-timeline-ruler">
+                      <div class="bl-timeline-ruler-inner">
+                        <div class="bl-timeline-ruler-mark major" style="left: 0;"><span>0ms</span></div>
+                        <div class="bl-timeline-ruler-mark major" style="left: 25%;"><span>4ms</span></div>
+                        <div class="bl-timeline-ruler-mark major" style="left: 50%;"><span>8ms</span></div>
+                        <div class="bl-timeline-ruler-mark major" style="left: 75%;"><span>12ms</span></div>
+                        <div class="bl-timeline-ruler-mark major" style="left: 100%;"><span>16ms</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="bl-timeline-scroll">
+                    <div class="bl-timeline-tracks">
+                      <!-- Main Thread Group -->
+                      <div class="bl-track-group" data-group="main-thread">
+                        <div class="bl-track-group-header" onclick="toggleTrackGroup(this, 'main-thread')">
+                          <div class="bl-track-group-toggle">
+                            <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                          </div>
+                          <span class="bl-track-group-name">Main Thread</span>
+                          <div class="bl-track-buttons">
+                            <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                            <button class="bl-track-btn" title="More" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></button>
+                          </div>
+                        </div>
+                        <div class="bl-track-group-content">
+                          <!-- Frame Track (expandable) -->
+                          <div class="bl-track expandable" data-track="frame" data-depth="1" onclick="toggleTrack(this, 'frame')">
+                            <div class="bl-track-toggle">
+                              <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                            </div>
+                            <span class="bl-track-name">Frame</span>
+                            <div class="bl-track-buttons">
+                              <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                              <button class="bl-track-btn" title="More" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></button>
+                            </div>
+                          </div>
+                          <div class="bl-track-children" data-track="frame">
+                            <!-- Scripts Track (expandable) -->
+                            <div class="bl-track expandable" data-track="scripts" data-depth="2" onclick="toggleTrack(this, 'scripts')">
+                              <div class="bl-track-toggle">
+                                <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                              </div>
+                              <span class="bl-track-name">Scripts</span>
+                              <div class="bl-track-buttons">
+                                <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                                <button class="bl-track-btn" title="More" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg></button>
+                              </div>
+                            </div>
+                            <div class="bl-track-children" data-track="scripts">
+                              <div class="bl-track" data-depth="3">
+                                <span class="bl-track-name">updateScene()</span>
+                                <div class="bl-track-buttons">
+                                  <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                                </div>
+                              </div>
+                              <div class="bl-track" data-depth="3">
+                                <span class="bl-track-name">processInput()</span>
+                                <div class="bl-track-buttons">
+                                  <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- Layout Track -->
+                            <div class="bl-track" data-depth="2">
+                              <span class="bl-track-name">Layout</span>
+                              <div class="bl-track-buttons">
+                                <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                              </div>
+                            </div>
+                            <!-- Paint Track (expandable) -->
+                            <div class="bl-track expandable" data-track="paint" data-depth="2" onclick="toggleTrack(this, 'paint')">
+                              <div class="bl-track-toggle">
+                                <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                              </div>
+                              <span class="bl-track-name">Paint</span>
+                              <div class="bl-track-buttons">
+                                <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                              </div>
+                            </div>
+                            <div class="bl-track-children" data-track="paint">
+                              <div class="bl-track" data-depth="3">
+                                <span class="bl-track-name">paint</span>
+                              </div>
+                              <div class="bl-track" data-depth="3">
+                                <span class="bl-track-name">rasterize</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- GPU Group -->
+                      <div class="bl-track-group" data-group="gpu">
+                        <div class="bl-track-group-header" onclick="toggleTrackGroup(this, 'gpu')">
+                          <div class="bl-track-group-toggle">
+                            <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                          </div>
+                          <span class="bl-track-group-name">GPU</span>
+                          <div class="bl-track-buttons">
+                            <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                          </div>
+                        </div>
+                        <div class="bl-track-group-content">
+                          <div class="bl-track">
+                            <span class="bl-track-name">Render Pass</span>
+                            <div class="bl-track-buttons">
+                              <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                            </div>
+                          </div>
+                          <div class="bl-track">
+                            <span class="bl-track-name">Compositing</span>
+                            <div class="bl-track-buttons">
+                              <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Workers Group -->
+                      <div class="bl-track-group" data-group="workers">
+                        <div class="bl-track-group-header" onclick="toggleTrackGroup(this, 'workers')">
+                          <div class="bl-track-group-toggle">
+                            <svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>
+                          </div>
+                          <span class="bl-track-group-name">Worker Threads</span>
+                          <div class="bl-track-buttons">
+                            <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                          </div>
+                        </div>
+                        <div class="bl-track-group-content">
+                          <div class="bl-track">
+                            <span class="bl-track-name">Worker 1</span>
+                            <div class="bl-track-buttons">
+                              <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                            </div>
+                          </div>
+                          <div class="bl-track">
+                            <span class="bl-track-name">Worker 2</span>
+                            <div class="bl-track-buttons">
+                              <button class="bl-track-btn" title="Pin" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg></button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="bl-timeline-lanes-column">
+                      <div class="bl-timeline-lanes-inner" style="width: 100%; min-height: 100%;">
+                        <!-- Grid Lines -->
+                        <div class="bl-timeline-grid">
+                          <div class="bl-timeline-grid-line major" style="left: 0;"></div>
+                          <div class="bl-timeline-grid-line" style="left: 12.5%;"></div>
+                          <div class="bl-timeline-grid-line major" style="left: 25%;"></div>
+                          <div class="bl-timeline-grid-line" style="left: 37.5%;"></div>
+                          <div class="bl-timeline-grid-line major" style="left: 50%;"></div>
+                          <div class="bl-timeline-grid-line" style="left: 62.5%;"></div>
+                          <div class="bl-timeline-grid-line major" style="left: 75%;"></div>
+                          <div class="bl-timeline-grid-line" style="left: 87.5%;"></div>
+                        </div>
+
+                        <div class="bl-timeline-playhead" style="left: 32%;"></div>
+
+                        <!-- Main Thread Lanes -->
+                        <div class="bl-lane-group" data-group="main-thread">
+                          <div class="bl-lane-group-header"></div>
+                          <div class="bl-lane-group-content">
+                            <!-- Frame lane -->
+                            <div class="bl-timeline-lane">
+                              <div class="bl-slice bl-slice-blue" style="left: 1%; width: 98%;">
+                                <span class="bl-slice-label">requestAnimationFrame</span>
+                                <span class="bl-slice-duration">16.4ms</span>
+                              </div>
+                            </div>
+                            <div class="bl-lane-children" data-track="frame">
+                              <!-- Scripts lane -->
+                              <div class="bl-timeline-lane">
+                                <div class="bl-slice bl-slice-green" style="left: 2%; width: 50%;">
+                                  <span class="bl-slice-label">Scripts</span>
+                                  <span class="bl-slice-duration">8.2ms</span>
+                                </div>
+                              </div>
+                              <div class="bl-lane-children" data-track="scripts">
+                                <!-- updateScene lane -->
+                                <div class="bl-timeline-lane">
+                                  <div class="bl-slice bl-slice-green" style="left: 3%; width: 25%;">
+                                    <span class="bl-slice-label">updateScene</span>
+                                  </div>
+                                </div>
+                                <!-- processInput lane -->
+                                <div class="bl-timeline-lane">
+                                  <div class="bl-slice bl-slice-green" style="left: 30%; width: 20%;">
+                                    <span class="bl-slice-label">processInput</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <!-- Layout lane -->
+                              <div class="bl-timeline-lane">
+                                <div class="bl-slice bl-slice-orange" style="left: 55%; width: 13%;">
+                                  <span class="bl-slice-label">Layout</span>
+                                  <span class="bl-slice-duration">2.1ms</span>
+                                </div>
+                              </div>
+                              <!-- Paint lane -->
+                              <div class="bl-timeline-lane">
+                                <div class="bl-slice bl-slice-purple" style="left: 70%; width: 12%;">
+                                  <span class="bl-slice-label">Paint</span>
+                                  <span class="bl-slice-duration">1.8ms</span>
+                                </div>
+                              </div>
+                              <div class="bl-lane-children" data-track="paint">
+                                <!-- drawRect lane -->
+                                <div class="bl-timeline-lane">
+                                  <div class="bl-slice bl-slice-purple" style="left: 71%; width: 5%;">
+                                    <span class="bl-slice-label">drawRect</span>
+                                  </div>
+                                </div>
+                                <!-- rasterize lane -->
+                                <div class="bl-timeline-lane">
+                                  <div class="bl-slice bl-slice-purple" style="left: 77%; width: 4%;">
+                                    <span class="bl-slice-label">rasterize</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- GPU Lanes -->
+                        <div class="bl-lane-group" data-group="gpu">
+                          <div class="bl-lane-group-header"></div>
+                          <div class="bl-lane-group-content">
+                            <div class="bl-timeline-lane">
+                              <div class="bl-slice bl-slice-red" style="left: 3%; width: 45%;">
+                                <span class="bl-slice-label">Render Pass</span>
+                                <span class="bl-slice-duration">7.2ms</span>
+                              </div>
+                            </div>
+                            <div class="bl-timeline-lane">
+                              <div class="bl-slice bl-slice-teal" style="left: 50%; width: 35%;">
+                                <span class="bl-slice-label">Compositing</span>
+                                <span class="bl-slice-duration">5.6ms</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Worker Lanes -->
+                        <div class="bl-lane-group" data-group="workers">
+                          <div class="bl-lane-group-header"></div>
+                          <div class="bl-lane-group-content">
+                            <div class="bl-timeline-lane">
+                              <div class="bl-slice bl-slice-yellow" style="left: 5%; width: 20%;">
+                                <span class="bl-slice-label">parseGeometry</span>
+                              </div>
+                            </div>
+                            <div class="bl-timeline-lane">
+                              <div class="bl-slice bl-slice-yellow" style="left: 10%; width: 15%;">
+                                <span class="bl-slice-label">decodeTexture</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="profiler-resize-handle" id="resizeHandle"></div>
+
+            <!-- Details Panel -->
+            <div class="profiler-details" id="detailsPanel">
+              <!-- Primary tabs row -->
+              <div class="profiler-details-tabs-primary">
+                <div class="details-primary-tabs">
+                  <button class="details-primary-tab active" onclick="switchDetailsPrimaryTab(this)">Selection</button>
+                  <button class="details-primary-tab" onclick="switchDetailsPrimaryTab(this)">History</button>
+                  <button class="details-primary-tab" onclick="switchDetailsPrimaryTab(this)">Flame Graph</button>
+                  <button class="details-primary-tab" onclick="switchDetailsPrimaryTab(this)">Statistics</button>
+                </div>
+                <div class="profiler-details-actions">
+                  <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Pin Selection">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>
+                  </button>
+                  <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Clear History">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                  </button>
+                </div>
+              </div>
+              <!-- Secondary tabs row (for Selection tab) -->
+              <div class="profiler-details-header">
+                <div class="details-secondary-tabs">
+                  <button class="details-secondary-tab active">Summary</button>
+                  <button class="details-secondary-tab">Call Stack</button>
+                  <button class="details-secondary-tab">Bottom-Up</button>
+                  <button class="details-secondary-tab">Top-Down</button>
+                </div>
+              </div>
+              <div class="profiler-details-content">
+                <div class="details-grid">
+                  <div class="details-section">
+                    <div class="details-section-title">Selected Slice</div>
+                    <div class="details-row">
+                      <span class="details-label">Function</span>
+                      <span class="details-value highlight">requestAnimationFrame</span>
+                    </div>
+                    <div class="details-row">
+                      <span class="details-label">Duration</span>
+                      <span class="details-value">16.4ms</span>
+                    </div>
+                    <div class="details-row">
+                      <span class="details-label">Self Time</span>
+                      <span class="details-value">0.4ms</span>
+                    </div>
+                  </div>
+
+                  <div class="details-section">
+                    <div class="details-section-title">Frame Statistics</div>
+                    <div class="details-row">
+                      <span class="details-label">Total Frame Time</span>
+                      <span class="details-value">16.4ms</span>
+                    </div>
+                    <div class="details-row">
+                      <span class="details-label">Scripts</span>
+                      <span class="details-value">8.2ms (50%)</span>
+                    </div>
+                    <div class="details-row">
+                      <span class="details-label">Layout</span>
+                      <span class="details-value">2.1ms (13%)</span>
+                    </div>
+                    <div class="flame-bar">
+                      <div class="flame-bar-segment" style="width: 50%; background-color: #5a9a5a;"></div>
+                      <div class="flame-bar-segment" style="width: 13%; background-color: #d4842a;"></div>
+                      <div class="flame-bar-segment" style="width: 11%; background-color: #8a6ab5;"></div>
+                      <div class="flame-bar-segment" style="width: 26%; background-color: #424242;"></div>
+                    </div>
+                  </div>
+
+                  <div class="details-section">
+                    <div class="details-section-title">Warnings</div>
+                    <div class="details-row" style="color: var(--bl-warning);">
+                      <span>Long frame detected (>16ms budget)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Bar -->
+          <footer class="bl-statusbar">
+            <span class="bl-statusbar-item">Frame: 1247</span>
+            <span class="bl-statusbar-item">Duration: 16.4ms</span>
+            <span class="bl-statusbar-item">60 FPS target</span>
+            <span class="bl-statusbar-item" style="margin-left: auto; border-right: none;">Profiler v1.0</span>
+          </footer>
+        </div>
+      </div>
+
+      <!-- Plugins Page -->
+      <div class="app-page" id="page-plugins">
+        <div class="page-plugins">
+          <!-- Header Bar -->
+          <header class="bl-header">
+            <div class="bl-header-menu">
+              <div class="bl-header-menu-item">File</div>
+              <div class="bl-header-menu-item">Edit</div>
+              <div class="bl-header-menu-item">View</div>
+              <div class="bl-header-menu-item">Help</div>
+            </div>
+            <div style="margin-left: auto; display: flex; align-items: center; gap: var(--bl-spacing-md);">
+              <input type="text" class="bl-input" placeholder="Search plugins..." style="width: 200px;">
+              <button class="bl-btn bl-btn-primary">Install Plugin</button>
+            </div>
+          </header>
+
+          <div class="plugins-main">
+            <div class="plugins-list">
+              <!-- Plugin Item: Enabled -->
+              <div class="plugin-item">
+                <div class="plugin-header">
+                  <label class="bl-checkbox">
+                    <input type="checkbox" checked>
+                  </label>
+                  <div class="plugin-info">
+                    <div class="plugin-name">Animation Nodes</div>
+                    <div class="plugin-version">v2.3.1</div>
+                  </div>
+                  <div class="plugin-actions">
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Settings">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-8a6 6 0 0 1 4.47 10.02l.73.73a.5.5 0 0 1-.71.71l-.73-.73A6 6 0 1 1 8 2z"/></svg>
+                    </button>
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="More">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="plugin-description">
+                  A powerful node-based visual scripting system for creating complex animations and procedural effects.
+                </div>
+                <div class="plugin-meta">
+                  <span class="bl-badge bl-badge-success">Enabled</span>
+                  <span class="plugin-author">by Jacques Lucke</span>
+                </div>
+              </div>
+
+              <!-- Plugin Item: Enabled -->
+              <div class="plugin-item">
+                <div class="plugin-header">
+                  <label class="bl-checkbox">
+                    <input type="checkbox" checked>
+                  </label>
+                  <div class="plugin-info">
+                    <div class="plugin-name">Hard Ops</div>
+                    <div class="plugin-version">v9.87.2</div>
+                  </div>
+                  <div class="plugin-actions">
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Settings">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-8a6 6 0 0 1 4.47 10.02l.73.73a.5.5 0 0 1-.71.71l-.73-.73A6 6 0 1 1 8 2z"/></svg>
+                    </button>
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="More">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="plugin-description">
+                  Workflow enhancement addon for hard surface modeling with boolean operations and advanced mesh tools.
+                </div>
+                <div class="plugin-meta">
+                  <span class="bl-badge bl-badge-success">Enabled</span>
+                  <span class="plugin-author">by Team C</span>
+                </div>
+              </div>
+
+              <!-- Plugin Item: Disabled -->
+              <div class="plugin-item disabled">
+                <div class="plugin-header">
+                  <label class="bl-checkbox">
+                    <input type="checkbox">
+                  </label>
+                  <div class="plugin-info">
+                    <div class="plugin-name">Node Wrangler</div>
+                    <div class="plugin-version">v1.0</div>
+                  </div>
+                  <div class="plugin-actions">
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Settings">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-8a6 6 0 0 1 4.47 10.02l.73.73a.5.5 0 0 1-.71.71l-.73-.73A6 6 0 1 1 8 2z"/></svg>
+                    </button>
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="More">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="plugin-description">
+                  Built-in addon with shortcuts and tools for efficient node editor workflow in shader and compositor nodes.
+                </div>
+                <div class="plugin-meta">
+                  <span class="bl-badge">Disabled</span>
+                  <span class="plugin-author">by Blender Foundation</span>
+                </div>
+              </div>
+
+              <!-- Plugin Item: Disabled -->
+              <div class="plugin-item disabled">
+                <div class="plugin-header">
+                  <label class="bl-checkbox">
+                    <input type="checkbox">
+                  </label>
+                  <div class="plugin-info">
+                    <div class="plugin-name">LoopTools</div>
+                    <div class="plugin-version">v4.6.7</div>
+                  </div>
+                  <div class="plugin-actions">
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Settings">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-8a6 6 0 0 1 4.47 10.02l.73.73a.5.5 0 0 1-.71.71l-.73-.73A6 6 0 1 1 8 2z"/></svg>
+                    </button>
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="More">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="plugin-description">
+                  Mesh editing tools including circle, curve, flatten, and relax operations for cleaner topology.
+                </div>
+                <div class="plugin-meta">
+                  <span class="bl-badge">Disabled</span>
+                  <span class="plugin-author">by Bart Crouch</span>
+                </div>
+              </div>
+
+              <!-- Plugin Item: Enabled -->
+              <div class="plugin-item">
+                <div class="plugin-header">
+                  <label class="bl-checkbox">
+                    <input type="checkbox" checked>
+                  </label>
+                  <div class="plugin-info">
+                    <div class="plugin-name">Rigify</div>
+                    <div class="plugin-version">v0.6.5</div>
+                  </div>
+                  <div class="plugin-actions">
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Settings">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-8a6 6 0 0 1 4.47 10.02l.73.73a.5.5 0 0 1-.71.71l-.73-.73A6 6 0 1 1 8 2z"/></svg>
+                    </button>
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="More">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="plugin-description">
+                  Automatic rigging system that generates production-ready character rigs with advanced controls.
+                </div>
+                <div class="plugin-meta">
+                  <span class="bl-badge bl-badge-success">Enabled</span>
+                  <span class="plugin-author">by Blender Foundation</span>
+                </div>
+              </div>
+
+              <!-- Plugin Item: Warning -->
+              <div class="plugin-item">
+                <div class="plugin-header">
+                  <label class="bl-checkbox">
+                    <input type="checkbox" checked>
+                  </label>
+                  <div class="plugin-info">
+                    <div class="plugin-name">Decal Machine</div>
+                    <div class="plugin-version">v2.4.0</div>
+                  </div>
+                  <div class="plugin-actions">
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="Settings">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-8a6 6 0 0 1 4.47 10.02l.73.73a.5.5 0 0 1-.71.71l-.73-.73A6 6 0 1 1 8 2z"/></svg>
+                    </button>
+                    <button class="bl-btn bl-btn-icon bl-tooltip" data-tooltip="More">
+                      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="plugin-description">
+                  Decal and trim sheet workflow addon for adding surface details without UV mapping complexity.
+                </div>
+                <div class="plugin-meta">
+                  <span class="bl-badge bl-badge-warning">Update Available</span>
+                  <span class="plugin-author">by MACHIN3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Bar -->
+          <footer class="bl-statusbar">
+            <span class="bl-statusbar-item">Plugins: 6 total</span>
+            <span class="bl-statusbar-item">4 enabled</span>
+            <span class="bl-statusbar-item">2 disabled</span>
+            <span class="bl-statusbar-item" style="margin-left: auto; border-right: none;">Plugin Manager v1.0</span>
+          </footer>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Theme persistence
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('bl-theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('bl-theme-light');
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('bl-theme-light');
+      const isLight = document.body.classList.contains('bl-theme-light');
+      localStorage.setItem('bl-theme', isLight ? 'light' : 'dark');
+    }
+
+    // Load theme on page load
+    loadTheme();
+
+    // Navigation
+    function toggleNav() {
+      document.getElementById('appNav').classList.toggle('collapsed');
+    }
+
+    function switchPage(pageId) {
+      // Update nav items
+      document.querySelectorAll('.app-nav-item[data-page]').forEach(item => {
+        item.classList.toggle('active', item.dataset.page === pageId);
+      });
+
+      // Update pages
+      document.querySelectorAll('.app-page').forEach(page => {
+        page.classList.toggle('active', page.id === 'page-' + pageId);
+      });
+
+      // Save to localStorage
+      localStorage.setItem('bl-current-page', pageId);
+    }
+
+    // Restore saved page on load
+    (function() {
+      const savedPage = localStorage.getItem('bl-current-page');
+      if (savedPage) {
+        switchPage(savedPage);
+      }
+    })();
+
+    // Tab switching
+    function switchTab(tab) {
+      const tabs = tab.parentElement.querySelectorAll('.bl-tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    }
+
+    // Details panel primary tab switching
+    function switchDetailsPrimaryTab(tab) {
+      const tabs = tab.parentElement.querySelectorAll('.details-primary-tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    }
+
+    // Track group toggle
+    function toggleTrackGroup(header, groupId) {
+      const trackGroup = header.parentElement;
+      const laneGroup = document.querySelector(`.bl-lane-group[data-group="${groupId}"]`);
+
+      trackGroup.classList.toggle('collapsed');
+      if (laneGroup) {
+        laneGroup.classList.toggle('collapsed');
+      }
+    }
+
+    // Individual track toggle (for nested tracks)
+    function toggleTrack(trackElement, trackId) {
+      const isCollapsed = trackElement.classList.toggle('collapsed');
+
+      // Find and toggle the track's children container
+      const trackChildren = trackElement.nextElementSibling;
+      if (trackChildren && trackChildren.classList.contains('bl-track-children') && trackChildren.dataset.track === trackId) {
+        trackChildren.style.display = isCollapsed ? 'none' : '';
+      }
+
+      // Also toggle corresponding lane children if they exist
+      const laneChildren = document.querySelector(`.bl-lane-children[data-track="${trackId}"]`);
+      if (laneChildren) {
+        laneChildren.style.display = isCollapsed ? 'none' : '';
+      }
+    }
+
+    // Expand all track groups and tracks
+    function expandAllTracks() {
+      // Expand all track groups
+      document.querySelectorAll('.bl-track-group.collapsed').forEach(group => {
+        group.classList.remove('collapsed');
+        const groupId = group.dataset.group;
+        const laneGroup = document.querySelector(`.bl-lane-group[data-group="${groupId}"]`);
+        if (laneGroup) laneGroup.classList.remove('collapsed');
+      });
+      // Expand all nested tracks
+      document.querySelectorAll('.bl-track.collapsed').forEach(track => {
+        track.classList.remove('collapsed');
+        const trackId = track.dataset.track;
+        const trackChildren = track.nextElementSibling;
+        if (trackChildren && trackChildren.classList.contains('bl-track-children')) {
+          trackChildren.style.display = '';
+        }
+        const laneChildren = document.querySelector(`.bl-lane-children[data-track="${trackId}"]`);
+        if (laneChildren) laneChildren.style.display = '';
+      });
+    }
+
+    // Collapse all track groups and tracks
+    function collapseAllTracks() {
+      // Collapse all track groups
+      document.querySelectorAll('.bl-track-group:not(.collapsed)').forEach(group => {
+        group.classList.add('collapsed');
+        const groupId = group.dataset.group;
+        const laneGroup = document.querySelector(`.bl-lane-group[data-group="${groupId}"]`);
+        if (laneGroup) laneGroup.classList.add('collapsed');
+      });
+      // Collapse all nested tracks
+      document.querySelectorAll('.bl-track.expandable:not(.collapsed)').forEach(track => {
+        track.classList.add('collapsed');
+        const trackId = track.dataset.track;
+        const trackChildren = track.nextElementSibling;
+        if (trackChildren && trackChildren.classList.contains('bl-track-children')) {
+          trackChildren.style.display = 'none';
+        }
+        const laneChildren = document.querySelector(`.bl-lane-children[data-track="${trackId}"]`);
+        if (laneChildren) laneChildren.style.display = 'none';
+      });
+    }
+
+    // Slider value updates
+    document.querySelectorAll('.bl-slider input[type="range"]').forEach(slider => {
+      slider.addEventListener('input', function() {
+        const value = (this.value / 100).toFixed(2);
+        this.nextElementSibling.textContent = value;
+      });
+    });
+
+    // Resize handle for details panel
+    const resizeHandle = document.getElementById('resizeHandle');
+    const detailsPanel = document.getElementById('detailsPanel');
+    let isResizing = false;
+
+    if (resizeHandle && detailsPanel) {
+      resizeHandle.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        document.body.style.cursor = 'ns-resize';
+        document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+        const containerRect = detailsPanel.parentElement.getBoundingClientRect();
+        const newHeight = containerRect.bottom - e.clientY;
+        if (newHeight >= 100 && newHeight <= window.innerHeight * 0.5) {
+          detailsPanel.style.height = newHeight + 'px';
+        }
+      });
+
+      document.addEventListener('mouseup', function() {
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      });
+    }
+  </script>
+</body>
+</html>
