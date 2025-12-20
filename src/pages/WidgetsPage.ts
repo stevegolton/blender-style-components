@@ -1,8 +1,8 @@
-var m = require('mithril');
-var State = require('../state').State;
+import m from 'mithril';
+import { State } from '../state';
 
-var WidgetsPage = {
-  view: function() {
+const WidgetsPage: m.Component = {
+  view(): m.Vnode {
     return m('.page-widgets', [
       // Header Bar
       m('header.bl-header', [
@@ -20,7 +20,7 @@ var WidgetsPage = {
         m('aside.demo-sidebar', [
           // Transform Panel
           m('.bl-panel', [
-            m('.bl-panel-header', { onclick: function(e) { e.target.closest('.bl-panel').classList.toggle('collapsed'); } }, [
+            m('.bl-panel-header', { onclick: (e: Event) => { (e.target as HTMLElement).closest('.bl-panel')?.classList.toggle('collapsed'); } }, [
               m('.bl-panel-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
               m('span.bl-panel-title', 'Transform')
             ]),
@@ -57,7 +57,7 @@ var WidgetsPage = {
 
           // Material Panel
           m('.bl-panel', [
-            m('.bl-panel-header', { onclick: function(e) { e.target.closest('.bl-panel').classList.toggle('collapsed'); } }, [
+            m('.bl-panel-header', { onclick: (e: Event) => { (e.target as HTMLElement).closest('.bl-panel')?.classList.toggle('collapsed'); } }, [
               m('.bl-panel-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
               m('span.bl-panel-title', 'Material')
             ]),
@@ -88,13 +88,13 @@ var WidgetsPage = {
 
           // Tree View Panel
           m('.bl-panel', [
-            m('.bl-panel-header', { onclick: function(e) { e.target.closest('.bl-panel').classList.toggle('collapsed'); } }, [
+            m('.bl-panel-header', { onclick: (e: Event) => { (e.target as HTMLElement).closest('.bl-panel')?.classList.toggle('collapsed'); } }, [
               m('.bl-panel-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
               m('span.bl-panel-title', 'Scene Collection')
             ]),
             m('.bl-panel-content', [
               m('.bl-tree', [
-                m('.bl-tree-item', { onclick: function(e) { e.target.closest('.bl-tree-item').classList.toggle('collapsed'); } }, [
+                m('.bl-tree-item', { onclick: (e: Event) => { (e.target as HTMLElement).closest('.bl-tree-item')?.classList.toggle('collapsed'); } }, [
                   m('.bl-tree-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
                   m('.bl-tree-icon', m('.icon-placeholder')),
                   m('span', 'Collection')
@@ -245,11 +245,11 @@ var WidgetsPage = {
             m('.demo-label', 'Sliders'),
             m('.demo-grid', [
               m('.bl-slider', [
-                m('input[type=range]', { min: 0, max: 100, value: 75, oninput: function(e) { e.target.nextElementSibling.textContent = (e.target.value / 100).toFixed(2); } }),
+                m('input[type=range]', { min: 0, max: 100, value: 75, oninput: (e: Event) => { const target = e.target as HTMLInputElement; (target.nextElementSibling as HTMLElement).textContent = (parseInt(target.value) / 100).toFixed(2); } }),
                 m('span.bl-slider-value', '0.75')
               ]),
               m('.bl-slider', [
-                m('input[type=range]', { min: 0, max: 100, value: 25, oninput: function(e) { e.target.nextElementSibling.textContent = (e.target.value / 100).toFixed(2); } }),
+                m('input[type=range]', { min: 0, max: 100, value: 25, oninput: (e: Event) => { const target = e.target as HTMLInputElement; (target.nextElementSibling as HTMLElement).textContent = (parseInt(target.value) / 100).toFixed(2); } }),
                 m('span.bl-slider-value', '0.25')
               ])
             ]),
@@ -264,10 +264,10 @@ var WidgetsPage = {
           m('section.demo-section', [
             m('h2.demo-section-title', 'Tabs'),
             m('.bl-tabs', [
-              m('button.bl-tab', { class: State.activeTab === 'Scene' ? 'active' : '', onclick: function() { State.activeTab = 'Scene'; } }, 'Scene'),
-              m('button.bl-tab', { class: State.activeTab === 'World' ? 'active' : '', onclick: function() { State.activeTab = 'World'; } }, 'World'),
-              m('button.bl-tab', { class: State.activeTab === 'Object' ? 'active' : '', onclick: function() { State.activeTab = 'Object'; } }, 'Object'),
-              m('button.bl-tab', { class: State.activeTab === 'Modifiers' ? 'active' : '', onclick: function() { State.activeTab = 'Modifiers'; } }, 'Modifiers')
+              m('button.bl-tab', { class: State.activeTab === 'Scene' ? 'active' : '', onclick: () => { State.activeTab = 'Scene'; } }, 'Scene'),
+              m('button.bl-tab', { class: State.activeTab === 'World' ? 'active' : '', onclick: () => { State.activeTab = 'World'; } }, 'World'),
+              m('button.bl-tab', { class: State.activeTab === 'Object' ? 'active' : '', onclick: () => { State.activeTab = 'Object'; } }, 'Object'),
+              m('button.bl-tab', { class: State.activeTab === 'Modifiers' ? 'active' : '', onclick: () => { State.activeTab = 'Modifiers'; } }, 'Modifiers')
             ]),
             m('.bl-tab-content', m('p', { style: { color: 'var(--bl-text-secondary)', margin: 0 } }, 'Tab content area'))
           ]),
@@ -343,4 +343,4 @@ var WidgetsPage = {
   }
 };
 
-module.exports = WidgetsPage;
+export default WidgetsPage;

@@ -1,31 +1,30 @@
-var m = require('mithril');
-var State = require('../state').State;
+import m from 'mithril';
+import { State } from '../state';
 
-var ProfilerPage = {
-  oncreate: function(vnode) {
-    // Setup resize handle
-    var resizeHandle = vnode.dom.querySelector('#resizeHandle');
-    var detailsPanel = vnode.dom.querySelector('#detailsPanel');
-    var isResizing = false;
+const ProfilerPage: m.Component = {
+  oncreate(vnode: m.VnodeDOM): void {
+    const resizeHandle = vnode.dom.querySelector('#resizeHandle') as HTMLElement | null;
+    const detailsPanel = vnode.dom.querySelector('#detailsPanel') as HTMLElement | null;
+    let isResizing = false;
 
     if (resizeHandle && detailsPanel) {
-      resizeHandle.addEventListener('mousedown', function(e) {
+      resizeHandle.addEventListener('mousedown', () => {
         isResizing = true;
         document.body.style.cursor = 'ns-resize';
         document.body.style.userSelect = 'none';
       });
 
-      document.addEventListener('mousemove', function(e) {
+      document.addEventListener('mousemove', (e: MouseEvent) => {
         if (!isResizing) return;
-        var containerRect = detailsPanel.parentElement.getBoundingClientRect();
-        var newHeight = containerRect.bottom - e.clientY;
+        const containerRect = detailsPanel.parentElement!.getBoundingClientRect();
+        const newHeight = containerRect.bottom - e.clientY;
         if (newHeight >= 100 && newHeight <= window.innerHeight * 0.5) {
           detailsPanel.style.height = newHeight + 'px';
           State.detailsPanelHeight = newHeight;
         }
       });
 
-      document.addEventListener('mouseup', function() {
+      document.addEventListener('mouseup', () => {
         isResizing = false;
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
@@ -33,27 +32,26 @@ var ProfilerPage = {
     }
   },
 
-  view: function() {
-    function toggleTrackGroup(groupId) {
+  view(): m.Vnode {
+    function toggleTrackGroup(groupId: string): void {
       State.collapsedTrackGroups[groupId] = !State.collapsedTrackGroups[groupId];
     }
 
-    function toggleTrack(trackId) {
+    function toggleTrack(trackId: string): void {
       State.collapsedTracks[trackId] = !State.collapsedTracks[trackId];
     }
 
-    function expandAllTracks() {
+    function expandAllTracks(): void {
       State.collapsedTrackGroups = {};
       State.collapsedTracks = {};
     }
 
-    function collapseAllTracks() {
+    function collapseAllTracks(): void {
       State.collapsedTrackGroups = { 'main-thread': true, 'gpu': true, 'workers': true };
       State.collapsedTracks = { 'frame': true, 'scripts': true, 'paint': true };
     }
 
     return m('.page-profiler', [
-      // Header Bar
       m('header.bl-header', [
         m('.bl-header-menu', [
           m('.bl-header-menu-item', 'File'),
@@ -71,7 +69,6 @@ var ProfilerPage = {
       m('.profiler-main', [
         m('.profiler-timeline-area', [
           m('.bl-timeline', [
-            // Timeline Header
             m('.bl-timeline-header', [
               m('span.bl-timeline-title', 'Frame Profile - Frame #1247'),
               m('.bl-btn-group', [
@@ -98,7 +95,6 @@ var ProfilerPage = {
               ])
             ]),
 
-            // Timeline Minimap
             m('.bl-timeline-minimap', [
               m('.bl-timeline-minimap-slice', { style: { left: '2%', width: '50%', top: '6px', backgroundColor: '#5a9a5a' } }),
               m('.bl-timeline-minimap-slice', { style: { left: '55%', width: '15%', top: '10px', backgroundColor: '#d4842a' } }),
@@ -107,7 +103,6 @@ var ProfilerPage = {
               m('.bl-timeline-minimap-viewport', { style: { left: '0%', width: '100%' } })
             ]),
 
-            // Timeline Body
             m('.bl-timeline-body', [
               m('.bl-timeline-ruler-row', [
                 m('.bl-timeline-tracks-header', [
@@ -140,45 +135,43 @@ var ProfilerPage = {
                     'data-group': 'main-thread',
                     class: State.collapsedTrackGroups['main-thread'] ? 'collapsed' : ''
                   }, [
-                    m('.bl-track-group-header', { onclick: function() { toggleTrackGroup('main-thread'); } }, [
+                    m('.bl-track-group-header', { onclick: () => toggleTrackGroup('main-thread') }, [
                       m('.bl-track-group-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
                       m('span.bl-track-group-name', 'Main Thread'),
                       m('.bl-track-buttons', [
-                        m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                        m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                           m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>')),
-                        m('button.bl-track-btn', { title: 'More', onclick: function(e) { e.stopPropagation(); } },
+                        m('button.bl-track-btn', { title: 'More', onclick: (e: Event) => e.stopPropagation() },
                           m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>'))
                       ])
                     ]),
                     m('.bl-track-group-content', [
-                      // Frame Track
                       m('.bl-track.expandable', {
                         'data-track': 'frame',
                         'data-depth': '1',
                         class: State.collapsedTracks['frame'] ? 'collapsed' : '',
-                        onclick: function() { toggleTrack('frame'); }
+                        onclick: () => toggleTrack('frame')
                       }, [
                         m('.bl-track-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
                         m('span.bl-track-name', 'Frame'),
                         m('.bl-track-buttons', [
-                          m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                          m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                             m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>')),
-                          m('button.bl-track-btn', { title: 'More', onclick: function(e) { e.stopPropagation(); } },
+                          m('button.bl-track-btn', { title: 'More', onclick: (e: Event) => e.stopPropagation() },
                             m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>'))
                         ])
                       ]),
                       !State.collapsedTracks['frame'] && m('.bl-track-children', { 'data-track': 'frame' }, [
-                        // Scripts Track
                         m('.bl-track.expandable', {
                           'data-track': 'scripts',
                           'data-depth': '2',
                           class: State.collapsedTracks['scripts'] ? 'collapsed' : '',
-                          onclick: function(e) { e.stopPropagation(); toggleTrack('scripts'); }
+                          onclick: (e: Event) => { e.stopPropagation(); toggleTrack('scripts'); }
                         }, [
                           m('.bl-track-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
                           m('span.bl-track-name', 'Scripts'),
                           m('.bl-track-buttons', [
-                            m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                            m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                               m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                           ])
                         ]),
@@ -186,14 +179,14 @@ var ProfilerPage = {
                           m('.bl-track', { 'data-depth': '3' }, [
                             m('span.bl-track-name', 'updateScene()'),
                             m('.bl-track-buttons', [
-                              m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                              m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                                 m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                             ])
                           ]),
                           m('.bl-track', { 'data-depth': '3' }, [
                             m('span.bl-track-name', 'processInput()'),
                             m('.bl-track-buttons', [
-                              m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                              m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                                 m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                             ])
                           ])
@@ -201,21 +194,20 @@ var ProfilerPage = {
                         m('.bl-track', { 'data-depth': '2' }, [
                           m('span.bl-track-name', 'Layout'),
                           m('.bl-track-buttons', [
-                            m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                            m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                               m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                           ])
                         ]),
-                        // Paint Track
                         m('.bl-track.expandable', {
                           'data-track': 'paint',
                           'data-depth': '2',
                           class: State.collapsedTracks['paint'] ? 'collapsed' : '',
-                          onclick: function(e) { e.stopPropagation(); toggleTrack('paint'); }
+                          onclick: (e: Event) => { e.stopPropagation(); toggleTrack('paint'); }
                         }, [
                           m('.bl-track-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
                           m('span.bl-track-name', 'Paint'),
                           m('.bl-track-buttons', [
-                            m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                            m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                               m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                           ])
                         ]),
@@ -232,11 +224,11 @@ var ProfilerPage = {
                     'data-group': 'gpu',
                     class: State.collapsedTrackGroups['gpu'] ? 'collapsed' : ''
                   }, [
-                    m('.bl-track-group-header', { onclick: function() { toggleTrackGroup('gpu'); } }, [
+                    m('.bl-track-group-header', { onclick: () => toggleTrackGroup('gpu') }, [
                       m('.bl-track-group-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
                       m('span.bl-track-group-name', 'GPU'),
                       m('.bl-track-buttons', [
-                        m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                        m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                           m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                       ])
                     ]),
@@ -244,14 +236,14 @@ var ProfilerPage = {
                       m('.bl-track', [
                         m('span.bl-track-name', 'Render Pass'),
                         m('.bl-track-buttons', [
-                          m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                          m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                             m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                         ])
                       ]),
                       m('.bl-track', [
                         m('span.bl-track-name', 'Compositing'),
                         m('.bl-track-buttons', [
-                          m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                          m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                             m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                         ])
                       ])
@@ -263,11 +255,11 @@ var ProfilerPage = {
                     'data-group': 'workers',
                     class: State.collapsedTrackGroups['workers'] ? 'collapsed' : ''
                   }, [
-                    m('.bl-track-group-header', { onclick: function() { toggleTrackGroup('workers'); } }, [
+                    m('.bl-track-group-header', { onclick: () => toggleTrackGroup('workers') }, [
                       m('.bl-track-group-toggle', m.trust('<svg viewBox="0 0 10 10"><path d="M2 1 L8 5 L2 9 Z"/></svg>')),
                       m('span.bl-track-group-name', 'Worker Threads'),
                       m('.bl-track-buttons', [
-                        m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                        m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                           m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                       ])
                     ]),
@@ -275,14 +267,14 @@ var ProfilerPage = {
                       m('.bl-track', [
                         m('span.bl-track-name', 'Worker 1'),
                         m('.bl-track-buttons', [
-                          m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                          m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                             m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                         ])
                       ]),
                       m('.bl-track', [
                         m('span.bl-track-name', 'Worker 2'),
                         m('.bl-track-buttons', [
-                          m('button.bl-track-btn', { title: 'Pin', onclick: function(e) { e.stopPropagation(); } },
+                          m('button.bl-track-btn', { title: 'Pin', onclick: (e: Event) => e.stopPropagation() },
                             m.trust('<svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 1L7 4 4.5 3.5 2 6l3.5 2L2 14l6-3.5L10.5 14 13 11.5 12.5 9l3-3z"/></svg>'))
                         ])
                       ])
@@ -292,7 +284,6 @@ var ProfilerPage = {
 
                 m('.bl-timeline-lanes-column', [
                   m('.bl-timeline-lanes-inner', { style: { width: '100%', minHeight: '100%' } }, [
-                    // Grid Lines
                     m('.bl-timeline-grid', [
                       m('.bl-timeline-grid-line.major', { style: { left: '0' } }),
                       m('.bl-timeline-grid-line', { style: { left: '12.5%' } }),
@@ -404,14 +395,13 @@ var ProfilerPage = {
 
         m('.profiler-resize-handle', { id: 'resizeHandle' }),
 
-        // Details Panel
         m('.profiler-details', { id: 'detailsPanel', style: { height: State.detailsPanelHeight + 'px' } }, [
           m('.profiler-details-tabs-primary', [
             m('.details-primary-tabs', [
-              ['Selection', 'History', 'Flame Graph', 'Statistics'].map(function(tab) {
+              ['Selection', 'History', 'Flame Graph', 'Statistics'].map((tab) => {
                 return m('button.details-primary-tab', {
                   class: State.activePrimaryTab === tab ? 'active' : '',
-                  onclick: function() { State.activePrimaryTab = tab; }
+                  onclick: () => { State.activePrimaryTab = tab; }
                 }, tab);
               })
             ]),
@@ -424,10 +414,10 @@ var ProfilerPage = {
           ]),
           m('.profiler-details-header', [
             m('.details-secondary-tabs', [
-              ['Summary', 'Call Stack', 'Bottom-Up', 'Top-Down'].map(function(tab) {
+              ['Summary', 'Call Stack', 'Bottom-Up', 'Top-Down'].map((tab) => {
                 return m('button.details-secondary-tab', {
                   class: State.activeSecondaryTab === tab ? 'active' : '',
-                  onclick: function() { State.activeSecondaryTab = tab; }
+                  onclick: () => { State.activeSecondaryTab = tab; }
                 }, tab);
               })
             ])
@@ -479,7 +469,6 @@ var ProfilerPage = {
         ])
       ]),
 
-      // Status Bar
       m('footer.bl-statusbar', [
         m('span.bl-statusbar-item', 'Frame: 1247'),
         m('span.bl-statusbar-item', 'Duration: 16.4ms'),
@@ -490,4 +479,4 @@ var ProfilerPage = {
   }
 };
 
-module.exports = ProfilerPage;
+export default ProfilerPage;

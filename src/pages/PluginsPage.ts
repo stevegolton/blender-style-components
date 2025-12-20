@@ -1,8 +1,18 @@
-var m = require('mithril');
+import m from 'mithril';
 
-var PluginsPage = {
-  view: function() {
-    var plugins = [
+interface Plugin {
+  name: string;
+  version: string;
+  author: string;
+  enabled: boolean;
+  status: string;
+  statusClass: string;
+  description: string;
+}
+
+const PluginsPage: m.Component = {
+  view(): m.Vnode {
+    const plugins: Plugin[] = [
       { name: 'Animation Nodes', version: 'v2.3.1', author: 'Jacques Lucke', enabled: true, status: 'Enabled', statusClass: 'bl-badge-success',
         description: 'A powerful node-based visual scripting system for creating complex animations and procedural effects.' },
       { name: 'Hard Ops', version: 'v9.87.2', author: 'Team C', enabled: true, status: 'Enabled', statusClass: 'bl-badge-success',
@@ -18,7 +28,6 @@ var PluginsPage = {
     ];
 
     return m('.page-plugins', [
-      // Header Bar
       m('header.bl-header', [
         m('.bl-header-menu', [
           m('.bl-header-menu-item', 'File'),
@@ -33,7 +42,7 @@ var PluginsPage = {
       ]),
 
       m('.plugins-main', [
-        m('.plugins-list', plugins.map(function(plugin) {
+        m('.plugins-list', plugins.map((plugin) => {
           return m('.plugin-item', { class: plugin.enabled ? '' : 'disabled' }, [
             m('.plugin-header', [
               m('label.bl-checkbox', [
@@ -59,7 +68,6 @@ var PluginsPage = {
         }))
       ]),
 
-      // Status Bar
       m('footer.bl-statusbar', [
         m('span.bl-statusbar-item', 'Plugins: 6 total'),
         m('span.bl-statusbar-item', '4 enabled'),
@@ -70,4 +78,4 @@ var PluginsPage = {
   }
 };
 
-module.exports = PluginsPage;
+export default PluginsPage;

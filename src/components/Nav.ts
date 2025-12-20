@@ -1,28 +1,25 @@
-var m = require('mithril');
-var state = require('../state');
-var State = state.State;
-var toggleTheme = state.toggleTheme;
+import m from 'mithril';
+import { State, toggleTheme } from '../state';
 
-function NavItem(route, icon, label) {
-  var currentRoute = m.route.get();
-  var isActive = currentRoute === route;
+function NavItem(route: string, icon: string, label: string): m.Vnode {
+  const currentRoute = m.route.get();
+  const isActive = currentRoute === route;
+  console.log(isActive, currentRoute, route);
   return m('a.app-nav-item', {
     class: isActive ? 'active' : '',
-    href: '#!/' + route,
-    oncreate: m.route.link,
-    onupdate: m.route.link
+    href: '#/' + route,
   }, [
     m.trust(icon),
     m('span.app-nav-item-label', label)
   ]);
 }
 
-var Nav = {
-  view: function() {
+const Nav: m.Component = {
+  view(): m.Vnode {
     return m('nav.app-nav', { class: State.navCollapsed ? 'collapsed' : '', id: 'appNav' }, [
       m('.app-nav-header', [
         m('button.app-nav-toggle', {
-          onclick: function() { State.navCollapsed = !State.navCollapsed; },
+          onclick: () => { State.navCollapsed = !State.navCollapsed; },
           title: 'Toggle sidebar'
         }, m.trust('<svg viewBox="0 0 16 16"><path d="M11 3L5 8l6 5V3z"/></svg>')),
         m('span.app-nav-title', 'Blender UI')
@@ -42,4 +39,4 @@ var Nav = {
   }
 };
 
-module.exports = Nav;
+export default Nav;
