@@ -10,7 +10,7 @@ function NavItem(route: string, icon: string, label: string): m.Vnode {
     'a.app-nav-item',
     {
       class: cx({ active: isActive }),
-      href: '#/' + route,
+      href: '#' + route,
     },
     [m('span.material-icons', icon), m('span.app-nav-item-label', label)]
   );
@@ -33,13 +33,13 @@ const Nav: m.Component = {
         m('span.app-nav-title', 'NightShift Demo'),
       ]),
       m('.app-nav-items', [
-        NavItem('widgets', 'widgets', 'Widgets'),
-        NavItem('profiler', 'bar_chart', 'Profiler'),
-        NavItem('plugins', 'extension', 'Plugins'),
-        NavItem('heating', 'thermostat', 'Heating'),
-        NavItem('quadcopter', 'flight', 'Quadcopter'),
-        NavItem('proxmox', 'dns', 'Proxmox'),
-        NavItem('finances', 'account_balance', 'Finances'),
+        NavItem('/widgets', 'widgets', 'Widgets'),
+        NavItem('/profiler', 'bar_chart', 'Profiler'),
+        NavItem('/plugins', 'extension', 'Plugins'),
+        NavItem('/heating', 'thermostat', 'Heating'),
+        NavItem('/quadcopter', 'flight', 'Quadcopter'),
+        NavItem('/proxmox', 'dns', 'Proxmox'),
+        NavItem('/finances', 'account_balance', 'Finances'),
       ]),
       m('.app-nav-footer', [
         m('.app-nav-item', { onclick: toggleTheme }, [
