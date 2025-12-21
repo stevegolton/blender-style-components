@@ -25,7 +25,7 @@ export function SplitPanel(): m.Component<SplitPanelAttrs> {
 
     oncreate(vnode) {
       const container = vnode.dom as HTMLElement;
-      const handle = container.querySelector('.bl-split-handle') as HTMLElement;
+      const handle = container.querySelector(':scope > .bl-split-handle') as HTMLElement;
       const direction = vnode.attrs.direction ?? 'horizontal';
       const minSize = vnode.attrs.minSize ?? 50;
 
