@@ -20,6 +20,8 @@ import ProxmoxPage from './pages/ProxmoxPage';
 import FinancesPage from './pages/FinancesPage';
 
 // Route configuration
+m.route.prefix = '#';
+
 const root = document.getElementById('app');
 if (root) {
   m.route(root, '/widgets', {
